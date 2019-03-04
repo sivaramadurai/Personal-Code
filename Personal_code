@@ -1,7 +1,25 @@
+// for fetching URL parameters
 var getUrlParameter = (name) => {
     var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
     if (results==null) {
         return null;
     }
     return decodeURI(results[1]) || 0;
+}
+
+// for fetching id values from name
+var customizableSettings = [
+    "title",
+    "fcmServerKey"
+]
+
+var showAppSettings = (data) =>{
+    var settings = data && data.settings;
+    if(typeof settings == "object"){
+        for (var setting in settings) {
+            if (customizableSettings.indexOf(setting)!==-1) {              
+                document.getElementById(setting).value = settings[setting];
+}
+        }
+    }
 }
