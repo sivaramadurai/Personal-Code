@@ -23,3 +23,439 @@ var showAppSettings = (data) =>{
         }
     }
 }
+
+//DOM Manipulator.js
+/** DOM Manipulators Start */
+function DOMManipulatorProvider(appname, appprefix) {
+    let getElementById = (id, fragment) => {
+        if (id != appname) {
+            id = appprefix + id;
+        }
+        return document.getElementById(id);
+    };
+    let createDOMElements = elements => {
+        /**FIXME: Create multiple Elements  using document fragment*/
+        if (!Array.isArray(elemets)) {
+            elements = [elements];
+        }
+        c = document.createDocumentFragment();
+        for (element of elements) {
+            createDOMElement();
+        }
+    };
+    let createDOMElement = (tag, id, parentid, classList, innerHTML, attributes, styles, insertMethod, fragment = null) => {
+        /**FIXME: Accept json object*/
+        let domElement = null;
+        if (id) {
+            domElement = getElementById(id);
+        }
+        if (domElement == null) {
+            domElement = document.createElement(tag);
+            if (id) {
+                if (id != appname) {
+                    id = appprefix + id;
+                }
+                domElement.id = id;
+            }
+            if (classList) {
+                classList.forEach(function(classname, index) {
+                    classList[index] = appprefix + classname;
+                });
+                domElement.classList.add(...classList);
+            }
+            for (attribute in attributes) {
+                domElement.setAttribute(attribute, attributes[attribute]);
+            }
+            for (style in styles) {
+                domElement.style[style] = styles[style];
+            }
+            if (innerHTML) {
+                domElement.innerHTML = innerHTML;
+            }
+            insertMethod = insertMethod || 'appendChild';
+            if (fragment) {} else if (parentid !== 'body' && parentid !== 'head') {
+                getElementById(parentid)[insertMethod](domElement);
+            } else {
+                document[parentid][insertMethod](domElement);
+            }
+        } else {
+            if (innerHTML) {
+                domElement.innerHTML = innerHTML;
+            }
+        }
+
+        return domElement;
+    };
+
+    let showOrHideElements = (elements, display) => {
+        if (!Array.isArray(elements)) {
+            elements = [elements];
+        }
+        elements.forEach(element => {
+            let domElement = getElementById(element);
+            if (domElement != null) {
+                domElement.style.display = display;
+            }
+        });
+    };
+
+    let showElements = (...elements) => {
+        showOrHideElements(elements, 'block');
+    };
+
+    let hideElements = (...elements) => {
+        showOrHideElements(elements, 'none');
+    };
+
+    let innerHTML = (id, value) => {
+        let returnvalue = '';
+        let domElement = getElementById(id);
+        if (domElement != null) {
+            if (value != undefined && value != null) {
+                domElement.innerHTML = value;
+            }
+            returnvalue = domElement.innerHTML.trim();
+        }
+        return returnvalue;
+    };
+    let inputValue = (id, value) => {
+        let returnvalue = '';
+        let domElement = getElementById(id);
+        if (domElement != null) {
+            if (value != undefined && value != null) {
+                domElement.value = value;
+            }
+            returnvalue = domElement.value.trim();
+        }
+        return returnvalue;
+    };
+
+    let setAttribute = (id, attributes) => {
+        let domElement = getElementById(id);
+        if (domElement != null) {
+            for (attribute in attributes) {
+                domElement.setAttribute(attribute, attributes[attribute]);
+            }
+        }
+    };
+
+    let removeAttribute = (id, attribute) => {
+        let domElement = getElementById(id);
+        if (domElement != null) {
+            domElement.removeAttribute(attribute);
+        }
+    };
+
+    let style = (ids, styles) => {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        for (id of ids) {
+            let domElement = getElementById(id);
+            if (domElement != null) {
+                for (style in styles) {
+                    domElement.style[style] = styles[style];
+                }
+            }
+        }
+    };
+
+    let scroll = (id, scrollToHeight) => {
+        let domElement = getElementById(id);
+        if (domElement != null) {
+            domElement.scrollTop = scrollToHeight || domElement.scrollHeight;
+        }
+    };
+
+    let addEventListener = (elements, events, action) => {
+        if (!Array.isArray(elements)) {
+            elements = [elements];
+        }
+        if (!Array.isArray(events)) {
+            events = [events];
+        }
+        elements.forEach(id => {
+            let domElement = getElementById(id);
+
+            if (domElement != null) {
+                events.forEach(event => {
+                    domElement.addEventListener(event, action);
+                });
+            }
+        });
+    };
+
+    let addOrRemoveClass = (id, classnames, action = 'add') => {
+        let domElement = getElementById(id);
+        if (domElement != null) {
+            actions = ['add', 'remove'];
+            if (actions.indexOf(action) < 0) {
+                action = 'add';
+            }
+            if (typeof classnames == 'string') {
+                classnames = [classnames];
+            }
+            classnames = classnames.map(el => appprefix + el);
+            domElement.classList[action](...classnames);
+        }
+    };
+
+    let addClass = (id, classname) => {
+        addOrRemoveClass(id, classname, 'add');
+    };
+
+    let removeClass = (id, classname) => {
+        addOrRemoveClass(id, classname, 'remove');
+    };
+
+    let replaceClass = (id, oldClass, newClass) => {
+        let domElement = getElementById(id);
+        if (domElement != null) {
+            domElement.classList['replace'](appprefix + oldClass, appprefix + newClass);
+        }
+    };
+
+    let hasClass = (id, classname) => {
+        let domElement = getElementById(id);
+        returnvalue = false;
+        if (domElement) {
+            returnvalue = domElement.classList.contains(appprefix + classname);
+        }
+        return returnvalue;
+    };
+    let isHidden = id => {
+        return window.getComputedStyle(getElementById(id)).display === 'none';
+    };
+    let hasOpacity = id => {
+        return window.getComputedStyle(getElementById(id)).opacity === '1';
+    };
+    return {
+        getElementById: getElementById,
+        createDOMElement: createDOMElement,
+        showOrHideElements: showOrHideElements,
+        showElements: showElements,
+        hideElements: hideElements,
+        innerHTML: innerHTML,
+        inputValue: inputValue,
+        setAttribute: setAttribute,
+        removeAttribute: removeAttribute,
+        style: style,
+        scroll: scroll,
+        addEventListener: addEventListener,
+        addOrRemoveClass: addOrRemoveClass,
+        addClass: addClass,
+        removeClass: removeClass,
+        replaceClass: replaceClass,
+        hasClass: hasClass,
+        isHidden: isHidden,
+        hasOpacity: hasOpacity
+    };
+}
+/**
+ * polyfilling the prepend() method if it's not available in case of Microsoft Edge.
+ * It is safe to remove the polyfill code once Edge starts supporting prepend method.
+ * 7th March 2018
+ **/
+(function(arr) {
+    arr.forEach(function(item) {
+        if (item.hasOwnProperty('prepend')) {
+            return;
+        }
+        Object.defineProperty(item, 'prepend', {
+            configurable: true,
+            enumerable: true,
+            writable: true,
+            value: function prepend() {
+                var argArr = Array.prototype.slice.call(arguments),
+                    docFrag = document.createDocumentFragment();
+
+                argArr.forEach(function(argItem) {
+                    var isNode = argItem instanceof Node;
+                    docFrag.appendChild(isNode ? argItem : document.createTextNode(String(argItem)));
+                });
+
+                this.insertBefore(docFrag, this.firstChild);
+            }
+        });
+    });
+})([Element.prototype, Document.prototype, DocumentFragment.prototype]);
+/** DOM Manipulators End */
+
+
+//helpers.js
+CE_Helper = () => {
+    let validate = () => {
+        let validateName = name => {
+            name = name || '';
+            return name != '';
+        };
+        let validateEmail = email => {
+            email = email || '';
+            let emailregex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return emailregex.test(email);
+        };
+        let validatePhone = phone => {
+            phone = phone || '';
+            return /^\d{10}$/.test(phone);
+        };
+        return {
+            name: validateName,
+            email: validateEmail,
+            phone: validatePhone
+        };
+    };
+    let isAnObject = (obj) => {
+        if (obj == null) return false;
+        return obj.constructor.name.toLowerCase() === "object"
+    }
+    let isEmpty = param => {
+        if (Array.isArray(param)) {
+            return !param.length;
+        }
+        if (isAnObject(param)) {
+            return !Object.keys(param).length;
+        }
+        return !param;
+    }
+    let isTruthy = function($true) {
+        let truevalues = [true, 1, '1', 'true', 'TRUE'];
+        return truevalues.includes($true);
+    }
+
+    let isFalsy = function($false) {
+        let falsyvalues = ['', 0, '0', false, null, 'null', undefined, 'undefined'];
+        return falsyvalues.includes($false);
+    }
+
+    let getOrdinalSuffix = number => {
+        let tens = number % 10,
+            hundreds = number % 100;
+        if (tens == 1 && hundreds != 11) return number + 'st';
+        if (tens == 2 && hundreds != 12) return number + 'nd';
+        if (tens == 3 && hundreds != 13) return number + 'rd';
+        return number + 'th';
+    };
+    let formatDate = time => {
+        var todays12am = new Date().setHours(0, 0, 0, 0);
+        var ydays12am = new Date(new Date().setDate(new Date().getDate() - 1)).setHours(0, 0, 0, 0);
+        if (time >= todays12am) {
+            return 'Today';
+        } else if (time >= ydays12am && time < todays12am) {
+            return 'Yesterday';
+        } else {
+            let date = new Date(time);
+            let month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            let formatted_date = getOrdinalSuffix(date.getDate()) + ' ' + month[date.getMonth()] + ' ' + date.getFullYear();
+            return formatted_date;
+        }
+    };
+    let getSystemDetails = () => {
+        var browser;
+        let isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+        let isFirefox = typeof InstallTrigger !== 'undefined';
+        let isSafari =
+            /constructor/i.test(window.HTMLElement) ||
+            (function(p) {
+                return p.toString() === '[object SafariRemoteNotification]';
+            })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+        let isIE = false || !!document.documentMode;
+        let isEdge = !isIE && !!window.StyleMedia;
+        let isChrome = !!window.chrome && !!window.chrome.webstore;
+        let isBlink = (isChrome || isOpera) && !!window.CSS;
+        if (isOpera) {
+            browser = 'opera';
+        } else if (isFirefox) {
+            browser = 'FireFox';
+        } else if (isEdge) {
+            browser = 'edge';
+        } else if (isSafari) {
+            browser = 'safari';
+        } else if (isIE) {
+            browser = 'ie';
+        } else if (isChrome) {
+            browser = 'chrome';
+        } else if (isBlink) {
+            browser = 'blink';
+        } else {
+            browser = null;
+        }
+        let devicetype = 'desktop';
+        if (typeof window.orientation !== 'undefined' || navigator.userAgent.indexOf('IEMobile') !== -1) {
+            devicetype = 'mobile';
+        }
+
+        let platform = navigator.platform;
+
+        let userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        if (/windows phone/i.test(userAgent)) {
+            platform = 'windowsphone';
+        } else if (platform == 'MacIntel' || platform == 'Mac Intel' || platform.indexOf('mac') == 0 || platform.indexOf('Mac') == 0) {
+            platform = 'mac';
+        } else if (platform.indexOf('Win') == 0 || platform == 'Windows' || platform == 'Win32' || platform == 'Win64' || platform.indexOf('win') == 0 || platform.split(' ')[0] == 'Win' || platform.split(' ')[0] == 'win' || platform == 'Win x86' || platform == 'windows') {
+            platform = 'windows';
+        } else if (platform == 'Linux' || platform.split(' ')[0] == 'Linux' || platform == 'kali' || platform.indexOf('Lin') == 0 || platform.indexOf('Linux') == 0) {
+            platform = 'linux';
+        } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            platform = 'iphone';
+        } else if (devicetype == 'Desktop') {
+            platform = 'desktop';
+        } else if (devicetype == 'Mobile') {
+            platform = 'mobile';
+        } else if (/android/i.test(userAgent) || platform == 'Linux armv7l' || platform.indexOf('android') == 0 || platform.indexOf('Android') == 0) {
+            platform = 'android';
+        }
+
+        return {
+            browser: browser,
+            devicetype: devicetype,
+            pagetitle: document.title,
+            url: window.location.href,
+            platform: platform,
+            referrer: document.referrer || ''
+        };
+    };
+    let getCookie = function(name) {
+        var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (match) return match[2];
+    }
+    let log = function(...input) {
+        if (this.getCookie('ce_dev') == 'ce_dev') {
+            input.unshift('##CE##');
+            console.log.apply(console, input);
+        }
+    }
+    let error = function(...input) {
+        if (this.getCookie('ce_dev') == 'ce_dev') {
+            input.unshift('##CE##');
+            console.log.apply(console, input);
+        }
+    };
+    let warn = function(...input) {
+        if (this.getCookie('ce_dev') == 'ce_dev') {
+            input.unshift('##CE##');
+            console.log.apply(console, input);
+        }
+    };
+    let info = function(...input) {
+        if (this.getCookie('ce_dev') == 'ce_dev') {
+            input.unshift('##CE##');
+            console.info.apply(console, input);
+        }
+    };
+    return {
+        isAnObject: isAnObject,
+        isEmpty: isEmpty,
+        getCookie: getCookie,
+        log: log,
+        error: error,
+        warn: warn,
+        info: info,
+        validate: validate,
+        isTruthy: isTruthy,
+        isFalsy: isFalsy,
+        getOrdinalSuffix: getOrdinalSuffix,
+        formatDate: formatDate,
+        getSystemDetails: getSystemDetails
+    };
+};
